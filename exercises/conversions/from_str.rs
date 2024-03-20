@@ -18,7 +18,7 @@ struct Person {
     age: usize,
 }
 
-// We will use this error type for the `FromStr` implementation.
+//  We will use this error type for the `FromStr` implementation.
 #[derive(Debug, PartialEq)]
 enum ParsePersonError {
     // Empty input string
@@ -31,9 +31,8 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
 
-// Steps:
+// TODO: Steps:
 // 1. If the length of the provided string is 0, an error should be returned
 // 2. Split the given string on the commas present in it
 // 3. Only 2 elements should be returned from the split, otherwise return an
@@ -52,8 +51,30 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.len() == 0 {
+            return Err(ParsePersonError::Empty);
+        }
+        let split = s.split(',');
+        let mut split = split.collect::<Vec<&str>>();
+        if split.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+        let name = split.remove(0);
+        if name.len() == 0 {
+            return Err(ParsePersonError::NoName);
+        }
+        let age = split.remove(0);
+        let age = age.parse::<usize>();
+        if age.is_err() {
+            return Err(ParsePersonError::ParseInt(age.err().unwrap()));
+        }
+        Ok(Person {
+            name: name.to_string(),
+            age: age.unwrap(),
+        })
     }
 }
+
 
 fn main() {
     let p = "Mark,20".parse::<Person>().unwrap();
